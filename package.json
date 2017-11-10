@@ -1,16 +1,20 @@
 {
-  "name": "poloniex-api",
+  "name": "poloniex-exchange-api",
   "version": "0.1.0",
   "description": "Simple typescript interface to the Poloniex cryptoexchange.",
-  "main": "index.js",
+  "main": "dist/es6/index.js",
+  "types": "dist/es6/index.d.ts",
+  "files": [
+    "dist/es6"
+  ],
   "scripts": {
     "build": "tsc",
-    "drive": "npm run build && node dist/es6/driver.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -rf dist",
+    "test": ""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/haleyga/poloniex-api.git"
+    "url": "git+https://github.com/haleyga/poloniex-exchange-api.git"
   },
   "keywords": [
     "crypto",
@@ -27,9 +31,9 @@
   "author": "Graham Haley",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/haleyga/poloniex-api/issues"
+    "url": "https://github.com/haleyga/poloniex-exchange-api/issues"
   },
-  "homepage": "https://github.com/haleyga/poloniex-api#readme",
+  "homepage": "https://github.com/haleyga/poloniex-exchange-api#readme",
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/chai": "^4.0.0",
