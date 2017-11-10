@@ -62,13 +62,16 @@ client.returnBalances()
 
 ```
 
-***Note: the remainder of this README.md will use TypeScript examples.***
+*Note: the remainder of this README.md will use TypeScript examples.*
 
 ## API Detail
 
 All endpoints are available via the client.  If authentication keys are provided during client construction, public 
 and private endpoints will succeed.  If no keys are given, only public endpoints will succeed.  Private endpoints 
-will return a promise rejection when not authenticated, so be sure to properly trap you errors!
+will return a promise rejection when not authenticated, so be sure to properly trap your errors.
+
+***No attempt is made to mitigate private calls when not authenticated.  It is the responsibility of the user to trap 
+any errors resulting from incorrect/invalid authentication***
 
 A few convenience properties and methods are provided:
 
@@ -92,12 +95,11 @@ method will replace the existing keys.
 ### Public Requests
 In order to place requests with public endpoints, simply instantiate the client with no parameters:
 
-###### TypeScript
 ```typescript
 const client: IPoloniexClient = getClient(); 
 ```
 
-### Private Request
+### Private Requests
 
 ##### Authentication
 In order to authenticate a client with the Poloniex API, a private request must provide a public key and a correctly 
