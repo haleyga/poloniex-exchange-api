@@ -40,9 +40,7 @@ const main = async (): Promise<{}> => {
 };
 
 main().then(data => console.log(data))
-      .catch((err) => {
-          console.error(err);
-      });
+      .catch((err) => console.error(err));
 ```
 
 ###### JavaScript
@@ -68,6 +66,29 @@ client.returnBalances()
 
 ## API Detail
 
+All endpoints are available via the client.  If authentication keys are provided during client construction, public 
+and private endpoints will succeed.  If no keys are given, only public endpoints will succeed.  Private endpoints 
+will return a promise rejection when not authenticated, so be sure to properly trap you errors!
+
+A few convenience properties and methods are provided:
+
+##### rawClient
+This gives the user acces to the underlying request forwarder.  While not very useful to a user, it does expose the 
+request signing algorithm via `rawClient#signMessage`.
+
+##### isUpgraded()
+This method returns a boolean corresponding to whether or not the user has provided API keys to the client.
+
+```typescript
+const { status, data } = client.isUpgrade() ? 
+   await client.returnPrivateTradeHistory({ currencyPair: 'BTC_NXT'}) :
+   await client.returnPublicTradeHistory({ currencyPair: 'BTC_NXT'});
+```
+
+##### upgrade()
+This method allows a user to upgrade a public client with credentials.  If the client already has credentials, this 
+method will replace the existing keys.
+
 ### Public Requests
 In order to place requests with public endpoints, simply instantiate the client with no parameters:
 
@@ -82,8 +103,6 @@ const client: IPoloniexClient = getClient();
 In order to authenticate a client with the Poloniex API, a private request must provide a public key and a correctly 
 signed request.  This library handles request signatures - the user simply provides a public/private key pair. You 
 can [generate your own API keys][api_keys_ref] through the Poloniex interface.
-
-#### Available Endpoints
 
 [api_ref]: https://poloniex.com/support/api/
 [api_keys_ref]: https://poloniex.com/apiKeys

@@ -350,7 +350,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
     },
 
     async returnPublicTradeHistory(queryParams: IReturnPublicTradeHistoryParams): Promise<IPoloniexResponse> {
-        const command = 'returnPublicTradeHistory';
+        const command = 'returnTradeHistory';
         const params  = (({ currencyPair, start, end }) =>
             ({ command, currencyPair, start, end }))(queryParams);
 
@@ -439,7 +439,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
     },
 
     async returnPrivateTradeHistory(queryParams?: IReturnPrivateTradeHistoryParams): Promise<IPoloniexResponse> {
-        const command  = 'returnPrivateTradeHistory';
+        const command  = 'returnTradeHistory';
         const nonce    = generateNonce();
         const required = { command, nonce };
         const optional = queryParams ?
