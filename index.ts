@@ -1,5 +1,5 @@
 import * as axiosDefault from 'axios';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import * as crypto from 'crypto';
 import * as qs from 'qs';
 
@@ -637,11 +637,6 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         return await this.rawClient.postToPrivateEndpoint(params);
     },
 });
-
-/**
- * Alias for Axios request options.
- */
-export interface IPoloniexRequestConfig extends AxiosRequestConfig {}
 
 /**
  * Alias for Axios response.
