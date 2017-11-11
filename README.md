@@ -5,6 +5,9 @@ Currently, only the REST API has been implemented.  Support for for the Push API
 This library is intended to be used with ES6, TypeScript, etc.  In the interest of moving towards the more-readable 
 `async/await` pattern, callbacks are not supported.  Only native Promise-based interaction is supported.
 
+This library does not track your request rate.  Poloniex throttles/disables api access if the request rate exceeds 
+certain limits.  *It is the responsibility of the user to track rate limits.*
+
 ## Getting Started
 
 #### Install
@@ -75,9 +78,9 @@ any errors resulting from incorrect/invalid authentication***
 
 A few convenience properties and methods are provided:
 
-##### rawClient
-This gives the user acces to the underlying request forwarder.  While not very useful to a user, it does expose the 
-request signing algorithm via `rawClient#signMessage`.
+##### rawAgent
+This gives the user access to the underlying request forwarder.  While not very useful to a user, it does expose the 
+request signing algorithm via `rawAgent#signMessage`.
 
 ##### isUpgraded()
 This method returns a boolean corresponding to whether or not the user has provided API keys to the client.

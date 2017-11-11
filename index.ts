@@ -322,7 +322,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
 
     isUpgraded(): boolean { return this.rawAgent.isUpgraded(); },
 
-    upgrade(newAuth: IApiAuth): void { this.rawAgent.update(newAuth); },
+    upgrade(newAuth: IApiAuth): void { this.rawAgent.upgrade(newAuth); },
 
     async returnTicker(): Promise<IPoloniexResponse> {
         const command = 'returnTicker';
@@ -647,7 +647,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
 /**
  * Alias for Axios request config.
  */
-export interface IPoloniexRequestConfig extends AxiosRequestConfig {};
+export interface IPoloniexRequestConfig extends AxiosRequestConfig {}
 
 /**
  * Alias for Axios response.
