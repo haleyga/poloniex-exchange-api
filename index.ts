@@ -208,13 +208,27 @@ export type IReturnDepositsWithdrawalsParams = { start: string, end: string };
 export type IReturnOpenOrdersParams = { currencyPair: string };
 export type IReturnPrivateTradeHistoryParams = { currencyPair: string, start?: string, end?: string, limit?: string };
 export type IReturnOrderTradesParams = { orderNumber: string; };
-export type IBuyParams =
-    { currencyPair: string, rate: number, amount: number, fillOrKill: '0', immediateOrCancel: '0', postOnly: '0' };
-export type ISellParams =
-    { currencyPair: string, rate: number, amount: number, fillOrKill: '0', immediateOrCancel: '0', postOnly: '0' };
+export type IBuyParams = {
+    currencyPair: string,
+    rate: number,
+    amount: number,
+    fillOrKill: string,
+    immediateOrCancel: string,
+    postOnly: string,
+};
+
+export type ISellParams = {
+    currencyPair: string,
+    rate: number,
+    amount: number,
+    fillOrKill: string,
+    immediateOrCancel: string,
+    postOnly: string,
+};
+
 export type ICancelOrderParams = { orderNumber: string; };
 export type IMoveOrderParams =
-    { orderNumber: string, rate: number, amount?: number, immediateOrCancel: '0', postOnly: '0' };
+    { orderNumber: string, rate: number, amount?: number, immediateOrCancel: string, postOnly: string };
 export type IWithdrawParams = { currency: string, amount: number, address: string, paymentId?: string };
 export type IAvailableBalancesParams = { account: string };
 export type ITransferBalanceParams = { currency: string, amount: number, fromAddress: string, toAddress: string };
