@@ -121,15 +121,21 @@ const getRawAgent = (auth?: IApiAuth): IRawAgent => ({
      * Fetches data from the public (unauthenticated) endpoints.
      *
      * @param {{}} queryParams
+     * @param configOverride
      * @returns {Promise<IPoloniexResponse>}
      */
-    async getPublicEndpoint(queryParams?: IQueryParams): Promise<AxiosResponse> {
+    async getPublicEndpoint(queryParams?: IQueryParams,
+                            configOverride?: IPoloniexRequestConfig): Promise<AxiosResponse> {
+
+        // Construct local config object
+        const config = { ...defaultConfig, ...configOverride };
+
 
         // The uri is a relative path to the publicAgentConfig,baseUrl
         const uri = `/public?${qs.stringify(queryParams)}`;
 
         // Construct the actual config to be used
-        const agentConfig = { ...publicAgentConfig, url: uri };
+        const agentConfig = { ...publicAgentConfig, url: uri, ...config };
 
         try {
             // Finally, send the request and return the response
@@ -152,12 +158,17 @@ const getRawAgent = (auth?: IApiAuth): IRawAgent => ({
      * Posts to the private (authenticated) endpoints.  If no API keys have been provided, this function will fail.
      *
      * @param {IPostBody} data
+     * @param configOverride
      * @returns {Promise<IPoloniexResponse>}
      */
-    async postToPrivateEndpoint(data: IPostBody): Promise<AxiosResponse> {
+    async postToPrivateEndpoint(data: IPostBody,
+                                configOverride?: IPoloniexRequestConfig): Promise<AxiosResponse> {
 
         // Ensure the user has credentials
         if (!this.isUpgraded()) return Promise.reject(`not authenticated`);
+
+        // Construct local config object
+        const config = { ...defaultConfig, ...configOverride };
 
         // The uri is a relative path to the privateAgentConfig baseUrl
         const uri = `/tradingApi`;
@@ -167,10 +178,11 @@ const getRawAgent = (auth?: IApiAuth): IRawAgent => ({
             ...privateAgentConfig.headers,
             Key : this.auth.publicKey,
             Sign: this.signMessage(data, this.auth.privateKey),
+            ...config.headers,
         };
 
         // Construct the actual config to be used
-        const agentConfig = { ...privateAgentConfig, headers, url: uri, data: qs.stringify(data) };
+        const agentConfig = { ...privateAgentConfig, headers, url: uri, data: qs.stringify(data), ...config };
 
         try {
             const response = await axios(agentConfig);
@@ -328,9 +340,10 @@ export interface IPoloniexClient {
  * Factory function to get a new Poloniex client.
  *
  * @param {IApiAuth} auth
+ * @param requestConfig
  * @returns {IPoloniexClient}
  */
-export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
+export const getClient = (auth?: IApiAuth, requestConfig: IPoloniexRequestConfig = null): IPoloniexClient => ({
 
     rawAgent: getRawAgent(auth),
 
@@ -342,14 +355,14 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const command = 'returnTicker';
         const params  = { command };
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async return24Volume(): Promise<IPoloniexResponse> {
         const command = 'return24hVolume';
         const params  = { command };
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async returnOrderBook(queryParams?: IReturnOrderBookParams): Promise<IPoloniexResponse> {
@@ -360,7 +373,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
                          { currencyPair: 'all' };
         const params   = { ...required, ...optional };
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async returnPublicTradeHistory(queryParams: IReturnPublicTradeHistoryParams): Promise<IPoloniexResponse> {
@@ -368,7 +381,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair, start, end }) =>
             ({ command, currencyPair, start, end }))(queryParams);
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async returnChartData(queryParams: IReturnChartDataParams): Promise<IPoloniexResponse> {
@@ -376,14 +389,14 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair, start, end, period }) =>
             ({ command, currencyPair, start, end, period }))(queryParams);
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async returnCurrencies(): Promise<IPoloniexResponse> {
         const command = 'returnCurrencies';
         const params  = { command };
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async returnLoanOrders(queryParams: IReturnLoanOrdersParams): Promise<IPoloniexResponse> {
@@ -391,7 +404,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currency }) =>
             ({ command, currency }))(queryParams);
 
-        return this.rawAgent.getPublicEndpoint(params);
+        return this.rawAgent.getPublicEndpoint(params, requestConfig);
     },
 
     async returnBalances(): Promise<IPoloniexResponse> {
@@ -399,7 +412,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnCompleteBalances(queryParams?: IReturnCompleteBalancesParams): Promise<IPoloniexResponse> {
@@ -411,7 +424,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
                          { account: 'all' };
         const params   = { ...required, ...optional };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnDepositAddress(): Promise<IPoloniexResponse> {
@@ -419,7 +432,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async generateNewAddress(queryParams: IGenerateNewAddressParams): Promise<IPoloniexResponse> {
@@ -428,7 +441,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currency }) =>
             ({ command, nonce, currency }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnDepositsWithdrawals(queryParams: IReturnDepositsWithdrawalsParams): Promise<IPoloniexResponse> {
@@ -437,7 +450,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ start, end }) =>
             ({ command, nonce, start, end }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnOpenOrders(queryParams?: IReturnOpenOrdersParams): Promise<IPoloniexResponse> {
@@ -449,7 +462,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
                          { currencyPair: 'all' };
         const params   = { ...required, ...optional };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnPrivateTradeHistory(queryParams?: IReturnPrivateTradeHistoryParams): Promise<IPoloniexResponse> {
@@ -462,7 +475,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
                          { currencyPair: 'all' };
         const params   = { ...required, ...optional };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnOrderTrades(queryParams: IReturnOrderTradesParams): Promise<IPoloniexResponse> {
@@ -471,7 +484,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ orderNumber }) =>
             ({ command, nonce, orderNumber }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async buy(queryParams: IBuyParams): Promise<IPoloniexResponse> {
@@ -480,7 +493,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair, rate, amount, fillOrKill, immediateOrCancel, postOnly }) =>
             ({ command, nonce, currencyPair, rate, amount, fillOrKill, immediateOrCancel, postOnly }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async sell(queryParams: ISellParams): Promise<IPoloniexResponse> {
@@ -489,7 +502,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair, rate, amount, fillOrKill, immediateOrCancel, postOnly }) =>
             ({ command, nonce, currencyPair, rate, amount, fillOrKill, immediateOrCancel, postOnly }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async cancelOrder(queryParams: ICancelOrderParams): Promise<IPoloniexResponse> {
@@ -498,7 +511,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ orderNumber }) =>
             ({ command, nonce, orderNumber }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async moveOrder(queryParams: IMoveOrderParams): Promise<IPoloniexResponse> {
@@ -507,7 +520,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ orderNumber, rate, amount, immediateOrCancel, postOnly }) =>
             ({ command, nonce, orderNumber, rate, amount, immediateOrCancel, postOnly }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async withdraw(queryParams: IWithdrawParams): Promise<IPoloniexResponse> {
@@ -516,7 +529,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currency, amount, address, paymentId }) =>
             ({ command, nonce, currency, amount, address, paymentId }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnFeeInfo(): Promise<IPoloniexResponse> {
@@ -524,7 +537,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnAvailableAccountBalances(queryParams?: IAvailableBalancesParams): Promise<IPoloniexResponse> {
@@ -537,7 +550,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
                          null;
         const params   = { ...required, ...optional };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnTradableBalances(): Promise<IPoloniexResponse> {
@@ -545,7 +558,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async transferBalance(queryParams: ITransferBalanceParams): Promise<IPoloniexResponse> {
@@ -554,7 +567,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currency, amount, fromAddress, toAddress }) =>
             ({ command, nonce, currency, amount, fromAddress, toAddress }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnMarginAccountSummary(): Promise<IPoloniexResponse> {
@@ -562,7 +575,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async marginBuy(queryParams: IMarginBuyParams): Promise<IPoloniexResponse> {
@@ -571,7 +584,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair, rate, amount, lendingRate }) =>
             ({ command, nonce, currencyPair, rate, amount, lendingRate }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async marginSell(queryParams: IMarginSellParams): Promise<IPoloniexResponse> {
@@ -580,7 +593,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair, rate, amount, lendingRate }) =>
             ({ command, nonce, currencyPair, rate, amount, lendingRate }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async getMarginPosition(queryParams?: IGetMarginPositionParams): Promise<IPoloniexResponse> {
@@ -593,7 +606,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
                          { currencyPair: 'all' };
         const params   = { ...required, ...optional };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async closeMarginPosition(queryParams: ICloseMarginPositionParams): Promise<IPoloniexResponse> {
@@ -602,7 +615,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currencyPair }) =>
             ({ command, nonce, currencyPair }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async createLoanOffer(queryParams: ICreateLoanOfferParams): Promise<IPoloniexResponse> {
@@ -611,7 +624,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ currency, amount, duration, autoRenew, lendingRate }) =>
             ({ command, nonce, currency, amount, duration, autoRenew, lendingRate }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async cancelLoanOffer(queryParams: ICancelLoanOfferParams): Promise<IPoloniexResponse> {
@@ -620,7 +633,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ orderNumber }) =>
             ({ command, nonce, orderNumber }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnOpenLoanOffers(): Promise<IPoloniexResponse> {
@@ -628,7 +641,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnActiveLoans(): Promise<IPoloniexResponse> {
@@ -636,7 +649,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const nonce   = generateNonce();
         const params  = { command, nonce };
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async returnLendingHistory(queryParams: IReturnLendingHistoryParams): Promise<IPoloniexResponse> {
@@ -645,7 +658,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ start, end, limit }) =>
             ({ command, nonce, start, end, limit }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 
     async toggleAutoRenew(queryParams: IToggleAutoRenvewParams): Promise<IPoloniexResponse> {
@@ -654,7 +667,7 @@ export const getClient = (auth?: IApiAuth): IPoloniexClient => ({
         const params  = (({ orderNumber }) =>
             ({ command, nonce, orderNumber }))(queryParams);
 
-        return this.rawAgent.postToPrivateEndpoint(params);
+        return this.rawAgent.postToPrivateEndpoint(params, requestConfig);
     },
 });
 
