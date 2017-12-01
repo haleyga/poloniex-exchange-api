@@ -101,9 +101,9 @@ export interface IRawAgent {
 
     isUpgraded(): boolean;
 
-    getPublicEndpoint(queryParams?: IQueryParams): Promise<AxiosResponse>;
+    getPublicEndpoint(queryParams?: IQueryParams, configOverride?: IPoloniexRequestConfig): Promise<AxiosResponse>;
 
-    postToPrivateEndpoint(data: IPostBody): Promise<AxiosResponse>;
+    postToPrivateEndpoint(data: IPostBody, configOverride?: IPoloniexRequestConfig): Promise<AxiosResponse>;
 
     signMessage(postBody: IPostBody, privateKey: string): string;
 
