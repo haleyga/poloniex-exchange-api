@@ -1,6 +1,6 @@
 {
   "name": "poloniex-exchange-api",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Simple typescript interface to the Poloniex cryptoexchange.",
   "main": "dist/es6/index.js",
   "types": "dist/es6/index.d.ts",
