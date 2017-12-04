@@ -173,12 +173,14 @@ const getRawAgent = (auth?: IApiAuth): IRawAgent => ({
         // The uri is a relative path to the privateAgentConfig baseUrl
         const uri = `/tradingApi`;
 
+        const headersOverride = config ? config.headers : null;
+
         // Add the appropriate POST request headers (API-Key and API-Sign)
         const headers = {
             ...privateAgentConfig.headers,
             Key : this.auth.publicKey,
             Sign: this.signMessage(data, this.auth.privateKey),
-            ...config.headers,
+            ...headersOverride,
         };
 
         // Construct the actual config to be used
