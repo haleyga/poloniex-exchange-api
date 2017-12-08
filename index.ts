@@ -141,9 +141,7 @@ const getRawAgent = (auth?: IApiAuth): IRawAgent => ({
             // Finally, send the request and return the response
             return Promise.resolve(await axios(agentConfig));
         } catch (err) {
-            const rejectionReason = err.response.data.error || err.response.data || err.response || err;
-
-            return Promise.reject(rejectionReason);
+            return Promise.reject(err);
         }
     },
 
@@ -192,9 +190,7 @@ const getRawAgent = (auth?: IApiAuth): IRawAgent => ({
             // Finally, send the request and return the response
             return Promise.resolve(response);
         } catch (err) {
-            const rejectionReason = err.response.data.error || err.response.data || err.response || err;
-
-            return Promise.reject(rejectionReason);
+            return Promise.reject(err);
         }
     },
 
