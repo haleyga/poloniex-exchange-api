@@ -6,20 +6,12 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "inlineSources": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "target": "es6",
     "declaration": true,
-    "outDir": "dist/es6"
+    "outDir": "dist"
   },
   "compileOnSave": true,
   "include": [
-    "index.ts",
-    "driver.ts",
-    "src/**/*.ts",
-    "node_modules/@types"
-  ],
-  "exclude": [
-    "node_modules"
+    "index.ts"
   ]
 }

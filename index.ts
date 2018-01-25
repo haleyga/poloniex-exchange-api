@@ -20,12 +20,13 @@ const defaultConfig = {
  * Default HTTP agent configuration.
  */
 const defaultAgentConfig = {
-    baseURL: defaultConfig.rootUrl,
-    headers: {
+    baseURL       : defaultConfig.rootUrl,
+    headers       : {
         'User-Agent': `Poloniex API Client (poloniex-exchange-api node package)`,
     },
-    method : 'GET',
-    timeout: defaultConfig.timeout,
+    method        : 'GET',
+    timeout       : defaultConfig.timeout,
+    validateStatus: () => true,
 };
 
 /**
